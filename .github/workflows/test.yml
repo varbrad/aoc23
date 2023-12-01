@@ -1,0 +1,21 @@
+
+name: Test
+
+on:
+  push:
+
+jobs:
+  test:
+    runs-on: alpine-3.14
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - uses: oven-sh/setup-bun@v1
+        name: Setup Bun
+        with:
+          bun-version: latest
+
+      - name: Run tests
+        run: bun run test
