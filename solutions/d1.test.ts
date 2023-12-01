@@ -1,6 +1,6 @@
-import { describe, expect, it } from "bun:test";
-import { part1, part2 } from "./d1";
-import { readInput } from "../utils/fs";
+import { describe, expect, it } from 'bun:test'
+import { part1, part2 } from './d1'
+import { readInput } from '../utils/fs'
 
 describe('d1:p1', () => {
   it('should pass the example', () => {
@@ -27,7 +27,7 @@ describe('d1:p2', () => {
     4nineeightseven2
     zoneight234
     7pqrstsixteen`
-    
+
     expect(part2(input)).toEqual(281)
   })
 
