@@ -1,3 +1,6 @@
+import invariant from 'tiny-invariant'
+import { sum } from '../utils/maths'
+
 const DIGIT_MAP: Record<string, number> = {
   one: 1,
   two: 2,
@@ -11,29 +14,19 @@ const DIGIT_MAP: Record<string, number> = {
 }
 
 const solve = (input: string, considerStrings: boolean) => {
-  const matchString = considerStrings
-    ? `\\d|${Object.keys(DIGIT_MAP).join('|')}`
-    : `\\d`
-  const firstDigitRegex = new RegExp(`^.*?(${matchString}).*$`)
-  const lastDigitRegex = new RegExp(`^.*(${matchString}).*?$`)
+  const g = considerStrings ? `\\d|${Object.keys(DIGIT_MAP).join('|')}` : `\\d`
+  const regex = new RegExp(`(?=(${g})).*(${g})`)
 
-  return input
-    .trim()
-    .split('\n')
-    .reduce((prev, line) => {
-      const firstDigit = line.match(firstDigitRegex)?.[1]
-      const lastDigit = line.match(lastDigitRegex)?.[1]
-      if (!firstDigit || !lastDigit)
-        throw new Error(`Couldnt find a digit in the line "${line}"`)
-      return (
-        prev +
-        Number(
-          `${DIGIT_MAP[firstDigit] ?? firstDigit}${
-            DIGIT_MAP[lastDigit] ?? lastDigit
-          }`,
-        )
-      )
-    }, 0)
+  return sum(
+    input
+      .trim()
+      .split('\n')
+      .map((line) => {
+        const [, a, b] = line.match(regex) ?? []
+        invariant(a && b, `Couldnt find a digit in the line "${line}"`)
+        return Number(`${DIGIT_MAP[a] ?? a}${DIGIT_MAP[b] ?? b}`)
+      }),
+  )
 }
 
 export const part1 = (input: string) => solve(input, false)
