@@ -25,8 +25,8 @@ export const part2 = (input: string) => {
       (o) => [o.id, o.winners.map((_, i) => o.id + i + 1)] as const,
     ),
   )
-  const scoreMap = new Map<number, number>()
 
+  const scoreMap = new Map<number, number>()
   const calcScore = (id: number): number =>
     scoreMap.has(id)
       ? scoreMap.get(id)!
