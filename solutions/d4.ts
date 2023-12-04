@@ -30,15 +30,17 @@ export const part2 = (input: string) => {
       winners: intersection(a, b).map((_, i) => id + i + 1),
     }))
 
-  const cardMap = new Map<number, number>()
-  const ids = cards.map((c) => c.id)
+  const cardMap = new Map<number, number[]>()
+  const scoreMap = new Map<number, number>()
+  cards.forEach(({ id, winners }) => cardMap.set(id, winners))
 
-  while (ids.length > 0) {
-    const next = ids.shift()!
-    cardMap.set(next, (cardMap.get(next) ?? 0) + 1)
-    const card = cards.find((c) => c.id === next)!
-    ids.push(...card.winners)
-  }
+  const calcScore = (id: number): number =>
+    1 + sum(cardMap.get(id)!.map(calcScore))
 
-  return sum(Array.from(cardMap.values()))
+  return sum(
+    cards.map(({ id }) => {
+      if (!scoreMap.has(id)) scoreMap.set(id, calcScore(id))
+      return scoreMap.get(id)!
+    }),
+  )
 }
