@@ -20,10 +20,10 @@ const parse = (input: string) => {
     steps: 0,
   }
 }
-type Parsed = ReturnType<typeof parse>
-type Input = { pos: string; ghost: boolean }
 
-const solve = (input: Parsed & Input): number => {
+const solve = (
+  input: ReturnType<typeof parse> & { pos: string; ghost: boolean },
+): number => {
   for (const dir of input.dirs) {
     input.pos = input.map.get(input.pos)![dir]
     input.steps++
