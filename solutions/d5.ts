@@ -60,13 +60,9 @@ export const part2 = (input: string) => {
   const [seeds, maps] = parse(input)
 
   const possibleSeeds = maps
-    .flatMap((m, i) => {
-      const pm = maps.slice(0, i + 1)
-      return m.flatMap(({ src, dest }) => [
-        toSeed(pm, src[0]),
-        toSeed(pm, dest[0]),
-      ])
-    })
+    .flatMap((m, i) =>
+      m.map(({ dest }) => toSeed(maps.slice(0, i + 1), dest[0])),
+    )
     .filter(isValidSeed(seeds))
 
   return solve(possibleSeeds, maps)
