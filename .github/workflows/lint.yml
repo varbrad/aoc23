@@ -1,0 +1,33 @@
+
+name: Lint
+
+on:
+  push:
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - uses: oven-sh/setup-bun@v1
+        name: Setup Bun
+        with:
+          bun-version: latest
+
+      - run: bun i
+      - run: bun run lint
+  tsc:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - uses: oven-sh/setup-bun@v1
+        name: Setup Bun
+        with:
+          bun-version: latest
+
+      - run: bun i
+      - run: bun run tsc

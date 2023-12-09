@@ -3,7 +3,8 @@
   "module": "index.ts",
   "type": "module",
   "scripts": {
-    "lint": "eslint . --ext .ts"
+    "lint": "eslint . --ext .ts",
+    "tsc": "tsc"
   },
   "devDependencies": {
     "@types/lodash": "^4.14.202",
