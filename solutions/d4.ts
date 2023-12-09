@@ -1,4 +1,5 @@
 import { intersection, sum } from 'lodash'
+import { loopSum } from '../utils/loop'
 
 const parse = (input: string) =>
   input
@@ -26,15 +27,7 @@ export const part2 = (input: string) => {
     ),
   )
 
-  const scoreMap = new Map<number, number>()
   const calcScore = (id: number): number =>
-    scoreMap.has(id)
-      ? scoreMap.get(id)!
-      : 1 + sum(cards.get(id)!.map(calcScore))
-
-  return sum(
-    Array.from(cards.keys()).map(
-      (id) => scoreMap.set(id, calcScore(id)).get(id)!,
-    ),
-  )
+    1 + loopSum(calcScore, cards.get(id)!)
+  return loopSum(calcScore, Array.from(cards.keys()))
 }
