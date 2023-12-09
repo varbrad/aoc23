@@ -4,6 +4,9 @@ name: Benchmark
 on:
   push:
 
+env:
+  FORCE_COLOR: 1
+
 jobs:
   benchmark:
     runs-on: ubuntu-latest

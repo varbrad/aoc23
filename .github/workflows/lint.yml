@@ -4,6 +4,9 @@ name: Lint
 on:
   push:
 
+env:
+  FORCE_COLOR: 1
+
 jobs:
   lint:
     runs-on: ubuntu-latest
