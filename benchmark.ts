@@ -14,8 +14,8 @@ const tryCall = (fn: () => void): boolean => {
   }
 }
 
-const MAX_TIME = 2000
-const MAX_ITERATIONS = 500
+const MAX_TIME = 1000
+const MAX_ITERATIONS = 1000
 const benchmark = (fn: (input: string) => unknown, input: string) => {
   const start = performance.now()
   const results: { time: number; ok: boolean }[] = []
@@ -42,7 +42,7 @@ const getOutput = (
   const fails = result.filter((r) => !r.ok).length
   const executionsPerSecond = 1000 / average
   const output = [
-    c.green(' > ' + label.padStart(4, ' ')),
+    (fails > 0 ? c.red : c.green)(' > ' + label.padStart(4, ' ')),
     c.yellow((average.toFixed(3) + 'ms').padStart(16, ' ')),
     c.yellow(executionsPerSecond.toFixed(0).padStart(16, ' ')),
     c.yellow(
