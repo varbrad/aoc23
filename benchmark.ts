@@ -60,7 +60,10 @@ const getOutput = (
     c.gray(`${loops}`.padStart(16, ' ')),
     fails > 0 ? c.red(('fails: ' + fails).padStart(16, ' ')) : '',
   ]
-  return output
+  return {
+    output,
+    average,
+  }
 }
 
 const run = async () => {
@@ -75,6 +78,8 @@ const run = async () => {
     .filter((s) => isDefined(s) && inputDir.includes(`d${s}.txt`))
     .map((s) => ({ day: Number(s), file: `d${s}.ts`, input: `d${s}.txt` }))
     .sort((a, b) => a.day - b.day)
+
+  const results = []
 
   for (const sol of solutions) {
     try {
@@ -99,13 +104,17 @@ const run = async () => {
       invariant(imported, 'Solution file could not be imported!')
 
       if (imported.part1) {
-        console.log(...getOutput('part1', imported.part1, input))
+        const { output, average } = getOutput('part1', imported.part1, input)
+        results.push({ day: sol.day, part: 1, average })
+        console.log(...output)
       } else {
         console.log(c.gray(' > part1 not implemented'))
       }
 
       if (imported.part2) {
-        console.log(...getOutput('part2', imported.part2, input))
+        const { output, average } = getOutput('part2', imported.part2, input)
+        results.push({ day: sol.day, part: 2, average })
+        console.log(...output)
       } else {
         console.log(c.gray(' > part2 not implemented'))
       }
@@ -115,6 +124,29 @@ const run = async () => {
       console.error(c.red(' > ' + (e instanceof Error ? e.message : String(e))))
     }
   }
+
+  results.sort((a, b) => a.average - b.average)
+  console.log(c.magenta('Fastest -> slowest'))
+  results.forEach((r, i) => {
+    console.log(
+      c.gray(`#${i + 1}`.padStart(3, ' ')),
+      c.cyan(('Day ' + r.day).padEnd(6, ' ')),
+      c.yellow('Part ' + r.part),
+      c.gray((r.average.toFixed(3) + 'ms').padStart(16, ' ')),
+    )
+  })
+
+  console.log('')
+
+  const totalAverageExecutionTime = results.reduce(
+    (prev, curr) => prev + curr.average,
+    0,
+  )
+
+  console.log(
+    c.magenta('Total average execution time for all solutions:'),
+    c.yellow(totalAverageExecutionTime.toFixed(3) + 'ms'),
+  )
 }
 
 run()
