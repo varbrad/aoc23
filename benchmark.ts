@@ -42,7 +42,7 @@ const getOutput = (
   const fails = result.filter((r) => !r.ok).length
   const executionsPerSecond = 1000 / average
   const output = [
-    (fails > 0 ? c.red : c.green)(' > ' + label.padStart(4, ' ')),
+    (fails > 0 ? c.red : c.green)(' > ' + label.padStart(6, ' ')),
     c.yellow((average.toFixed(3) + 'ms').padStart(16, ' ')),
     c.yellow(executionsPerSecond.toFixed(0).padStart(16, ' ')),
     c.yellow(
@@ -85,7 +85,7 @@ const run = async () => {
     try {
       console.log(
         ...[
-          c.cyan(('Day ' + sol.day).padEnd(8, ' ')),
+          c.cyan(('Day ' + sol.day).padEnd(9, ' ')),
           c.gray('average'.padStart(16, ' ')),
           c.gray('loops/s'.padStart(16, ' ')),
           c.gray('min'.padStart(16, ' ')),
@@ -104,7 +104,7 @@ const run = async () => {
       invariant(imported, 'Solution file could not be imported!')
 
       if (imported.part1) {
-        const { output, average } = getOutput('part1', imported.part1, input)
+        const { output, average } = getOutput('Part 1', imported.part1, input)
         results.push({ day: sol.day, part: 1, average })
         console.log(...output)
       } else {
@@ -112,7 +112,7 @@ const run = async () => {
       }
 
       if (imported.part2) {
-        const { output, average } = getOutput('part2', imported.part2, input)
+        const { output, average } = getOutput('Part 2', imported.part2, input)
         results.push({ day: sol.day, part: 2, average })
         console.log(...output)
       } else {
