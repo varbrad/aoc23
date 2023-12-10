@@ -144,7 +144,7 @@ const run = async () => {
   )
 
   console.log(
-    c.magenta('Total average execution time for all solutions:'),
+    c.magenta('Total execution time for all solutions:'),
     c.yellow(totalAverageExecutionTime.toFixed(3) + 'ms'),
   )
 }
