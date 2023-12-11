@@ -6,14 +6,14 @@ To install dependencies:
 bun install
 ```
 
-To run:
-
-```bash
-bun run solutions/d{n}.ts
-```
-
 To test:
 
 ```bash
 bun test
+```
+
+To benchmark:
+
+```bash
+bun benchmark.ts
 ```
