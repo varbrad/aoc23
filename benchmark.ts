@@ -138,14 +138,26 @@ const run = async () => {
 
   console.log('')
 
-  const totalAverageExecutionTime = results.reduce(
-    (prev, curr) => prev + curr.average,
-    0,
+  const totalTimes = results.reduce(
+    (prev, curr) => ({
+      part1: prev.part1 + (curr.part === 1 ? curr.average : 0),
+      part2: prev.part2 + (curr.part === 2 ? curr.average : 0),
+      total: prev.total + curr.average,
+    }),
+    { part1: 0, part2: 0, total: 0 },
   )
 
   console.log(
-    c.magenta('Total execution time for all solutions:'),
-    c.yellow(totalAverageExecutionTime.toFixed(3) + 'ms'),
+    c.magenta('Total execution time for Part 1 solutions:'.padStart(42, ' ')),
+    c.green((totalTimes.part1.toFixed(3) + 'ms').padStart(10, ' ')),
+  )
+  console.log(
+    c.magenta('Total execution time for Part 2 solutions:'.padStart(42, ' ')),
+    c.red((totalTimes.part2.toFixed(3) + 'ms').padStart(10, ' ')),
+  )
+  console.log(
+    c.magenta('Total execution time for all solutions:'.padStart(42, ' ')),
+    c.yellow((totalTimes.total.toFixed(3) + 'ms').padStart(10, ' ')),
   )
 }
 
