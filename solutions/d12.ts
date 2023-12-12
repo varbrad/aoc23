@@ -37,10 +37,11 @@ const calculateVariants = memoize((row: string, groups: number[]): number => {
     return calculateVariants(row.slice(groupSize + 1), remainingGroups)
   }
 
-  // Calculate the two possibilities: . or #
+  // We must have a ? as the leading character, so we will replace it with a `#` and a `.` and continue
+  const nextSlice = row.slice(1)
   return (
-    calculateVariants('#' + row.slice(1), groups) +
-    calculateVariants('.' + row.slice(1), groups)
+    calculateVariants('#' + nextSlice, groups) +
+    calculateVariants('.' + nextSlice, groups)
   )
 })
 
