@@ -1,7 +1,7 @@
-export const loopSum = <T>(map: (n: T) => number, arr: T[]) => {
+export const loopSum = <T>(map: (n: T, ix: number) => number, arr: T[]) => {
   let sum = 0
   for (let i = 0; i < arr.length; ++i) {
-    sum += map(arr[i])
+    sum += map(arr[i], i)
   }
   return sum
 }
