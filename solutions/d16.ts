@@ -4,56 +4,34 @@ export const solve = (
   grid: ('.' | '|' | '-' | '/' | '\\')[][],
   initial: Beam,
 ) => {
-  const beams: Beam[] = [initial]
   const w = grid[0].length
   const h = grid.length
 
   const memory = new Set<string>()
-  const visited = new Set<string>()
 
-  while (beams.length > 0) {
-    for (let j = beams.length - 1; j >= 0; --j) {
-      const [x, y, dx, dy] = beams.shift()!
-      if (memory.has(`${x},${y},${dx},${dy}`)) continue
-      const nx = x + dx
-      const ny = y + dy
-      if (nx < 0 || nx >= w || ny < 0 || ny >= h) continue
-      const c = grid[ny][nx]
-      switch (c) {
-        case '.':
-          beams.push([nx, ny, dx, dy])
-          break
-        case '/': {
-          beams.push([nx, ny, -dy, -dx])
-          break
-        }
-        case '\\': {
-          beams.push([nx, ny, dy, dx])
-          break
-        }
-        case '-': {
-          if (dy !== 0) {
-            beams.push([nx, ny, -1, 0], [nx, ny, 1, 0])
-          } else {
-            beams.push([nx, ny, dx, dy])
-          }
-          break
-        }
-        case '|': {
-          if (dx !== 0) {
-            beams.push([nx, ny, 0, -1], [nx, ny, 0, 1])
-          } else {
-            beams.push([nx, ny, dx, dy])
-          }
-          break
-        }
-      }
-      memory.add(`${x},${y},${dx},${dy}`)
-      visited.add(`${nx},${ny}`)
+  const moveBeam = ([x, y, dx, dy]: Beam, set: Set<string>): number => {
+    const nx = x + dx
+    const ny = y + dy
+    if (memory.has(`${nx},${ny},${dx},${dy}`)) return set.size
+    if (nx < 0 || nx >= w || ny < 0 || ny >= h) return set.size
+    set.add(`${nx},${ny}`)
+    memory.add(`${nx},${ny},${dx},${dy}`)
+    const cell = grid[ny][nx]
+    if (cell === '\\') return moveBeam([nx, ny, dy, dx], set)
+    else if (cell === '/') return moveBeam([nx, ny, -dy, -dx], set)
+    else if (cell === '|' && dy === 0) {
+      moveBeam([nx, ny, 0, -1], set)
+      moveBeam([nx, ny, 0, 1], set)
+    } else if (cell === '-' && dx === 0) {
+      moveBeam([nx, ny, -1, 0], set)
+      moveBeam([nx, ny, 1, 0], set)
+    } else {
+      moveBeam([nx, ny, dx, dy], set)
     }
+    return set.size
   }
 
-  return visited.size
+  return moveBeam(initial, new Set())
 }
 
 const parse = (input: string) =>
