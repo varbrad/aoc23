@@ -9,16 +9,16 @@ export const solve = (
 
   const memory = new Set<string>()
 
-  const moveBeam = ([x, y, dx, dy]: Beam, set: Set<string>): number => {
+  const moveBeam = ([x, y, dx, dy]: Beam, set: Set<string>): void => {
     const nx = x + dx
     const ny = y + dy
-    if (memory.has(`${nx},${ny},${dx},${dy}`)) return set.size
-    if (nx < 0 || nx >= w || ny < 0 || ny >= h) return set.size
+    if (memory.has(`${nx},${ny},${dx},${dy}`)) return
+    if (nx < 0 || nx >= w || ny < 0 || ny >= h) return
     set.add(`${nx},${ny}`)
     memory.add(`${nx},${ny},${dx},${dy}`)
     const cell = grid[ny][nx]
-    if (cell === '\\') return moveBeam([nx, ny, dy, dx], set)
-    else if (cell === '/') return moveBeam([nx, ny, -dy, -dx], set)
+    if (cell === '\\') moveBeam([nx, ny, dy, dx], set)
+    else if (cell === '/') moveBeam([nx, ny, -dy, -dx], set)
     else if (cell === '|' && dy === 0) {
       moveBeam([nx, ny, 0, -1], set)
       moveBeam([nx, ny, 0, 1], set)
@@ -28,10 +28,11 @@ export const solve = (
     } else {
       moveBeam([nx, ny, dx, dy], set)
     }
-    return set.size
   }
 
-  return moveBeam(initial, new Set())
+  const set = new Set<string>()
+  moveBeam(initial, set)
+  return set.size
 }
 
 const parse = (input: string) =>
@@ -46,15 +47,19 @@ export const part2 = (input: string) => {
 
   let max = -1
   for (let x = 0; x < grid[0].length; ++x) {
-    const top = solve(grid, [x, -1, 0, 1])
-    const bottom = solve(grid, [x, grid.length, 0, -1])
-    max = Math.max(max, top, bottom)
+    max = Math.max(
+      max,
+      solve(grid, [x, -1, 0, 1]),
+      solve(grid, [x, grid.length, 0, -1]),
+    )
   }
 
   for (let y = 0; y < grid.length; ++y) {
-    const left = solve(grid, [-1, y, 1, 0])
-    const right = solve(grid, [grid[0].length, y, -1, 0])
-    max = Math.max(max, left, right)
+    max = Math.max(
+      max,
+      solve(grid, [-1, y, 1, 0]),
+      solve(grid, [grid[0].length, y, -1, 0]),
+    )
   }
 
   return max
