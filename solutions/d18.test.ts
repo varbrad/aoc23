@@ -62,11 +62,11 @@ describe('d18:p2', () => {
       U 3 (#a77fa3)
       L 2 (#015232)
       U 2 (#7a21e3)`),
-    ).toEqual(952408144115)
+    ).toEqual(952_408_144_115)
   })
 
   it('should solve puzzle input', async () => {
     const input = await readInput('d18.txt')
-    expect(part2(input)).toEqual(60612092439765)
+    expect(part2(input)).toEqual(60_612_092_439_765)
   })
 })
