@@ -1,54 +1,70 @@
-import { isInside } from '../utils/polygons'
-
-const rgx = /(\w) (\d+) \((#[\w\d]+)\)/
-export const part1 = (input: string) => {
-  const ins = input
+const parse = (input: string, mode: 'normal' | 'colour') =>
+  input
     .trim()
     .split('\n')
     .map((l) => {
       const [dir, steps, colour] = l.match(rgx)!.slice(1)
-      return { dir, steps: Number(steps), colour }
+      switch (mode) {
+        case 'normal':
+          return { dir, steps: Number(steps) }
+        case 'colour':
+          return {
+            dir: ['R', 'D', 'L', 'U'][Number(colour[5])],
+            steps: parseInt(colour.slice(0, 5), 16),
+          }
+      }
     })
 
-  const trench: [number, number][] = [[0, 0]]
-  ins.forEach(({ dir, steps }) => {
-    for (let i = 0; i < steps; ++i) {
-      trench.push([
-        trench[trench.length - 1][0] + (dir === 'R' ? 1 : dir === 'L' ? -1 : 0),
-        trench[trench.length - 1][1] + (dir === 'U' ? -1 : dir === 'D' ? 1 : 0),
-      ])
-    }
-  })
+const rgx = /(\w) (\d+) \(#([\w\d]+)\)/
+const solve = (ins: ReturnType<typeof parse>) => {
+  const xs: number[] = [0]
+  const ys: number[] = [0]
+  // Ignore the last instruction, as we don't want to return to the start
+  for (let i = 0; i < ins.length - 1; ++i) {
+    const { dir, steps } = ins[i]
+    xs.push(
+      xs[xs.length - 1] + (dir === 'R' ? steps : dir === 'L' ? -steps : 0),
+    )
+    ys.push(
+      ys[ys.length - 1] + (dir === 'U' ? steps : dir === 'D' ? -steps : 0),
+    )
+  }
 
-  const { min, max } = trench.reduce(
-    (prev, acc) => {
-      const [x, y] = acc
-      const [minX, minY] = prev.min
-      const [maxX, maxY] = prev.max
-      return {
-        min: [Math.min(minX, x), Math.min(minY, y)],
-        max: [Math.max(maxX, x), Math.max(maxY, y)],
-      }
-    },
-    {
-      min: [Infinity, Infinity],
-      max: [-Infinity, -Infinity],
-    },
-  )
+  let missedCells = 0
+  for (let i = 0; i < xs.length; ++i) {
+    const a = [xs[i], ys[i]]
+    const b = [xs[(i + 1) % xs.length], ys[(i + 1) % xs.length]]
+    const c = [xs[(i + 2) % xs.length], ys[(i + 2) % xs.length]]
+    const dx = b[0] - a[0]
+    const dy = b[1] - a[1]
 
-  let sum = 0
-  for (let y = min[1]; y <= max[1]; ++y) {
-    for (let x = min[0]; x <= max[0]; ++x) {
-      const onLine = trench.some(([tx, ty]) => tx === x && ty === y)
-      if (onLine) {
-        sum++
-        continue
-      }
-      const inside = isInside(trench, x, y)
-      if (inside) {
-        sum++
-      }
+    if (dx < 0 && dy === 0) {
+      missedCells += -dx + 1
+      if (c[1] < b[1]) missedCells--
+      // If we then go up after going left, we'll be back in the trench
+      // So deduct one (as otherwise we'll double count a cell)
+    } else if (dy > 0) {
+      missedCells += dy
+      // If we then go left, we'll be back in the trench
+      // So deduct one (as otherwise we'll double count a cell)
+      if (c[0] < b[0]) missedCells--
     }
   }
-  return sum
+
+  const n = xs.length
+  const area: number =
+    0.5 *
+    Math.abs(
+      xs.reduce(
+        (acc, val, i) =>
+          acc + (val * ys[(i + 1) % n] - xs[(i + 1) % n] * ys[i]),
+        0,
+      ) +
+        (xs[n - 1] * ys[0] - xs[0] * ys[n - 1]),
+    )
+
+  return area + missedCells
 }
+
+export const part1 = (input: string) => solve(parse(input, 'normal'))
+export const part2 = (input: string) => solve(parse(input, 'colour'))
