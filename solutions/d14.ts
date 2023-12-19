@@ -114,6 +114,7 @@ function findRepeatPointAndLength(sequence: number[]): {
 export const part2 = (input: string) => {
   const grid = RockGrid.parse(input)
   const scores = []
+  // eslint-disable-next-line no-constant-condition
   while (true) {
     scores.push(grid.cycle().score())
     const pattern = findRepeatPointAndLength(scores)
