@@ -4,7 +4,7 @@ import { product } from '../utils/maths'
 type Ins =
   | {
       type: 'compare'
-      property: 0 | 1 | 2 | 3 // x | m | a | s
+      property: 0 | 1 | 2 | 3 // 0=x | 1=m | 2=a | 3=s
       op: '<' | '>'
       v: number
       to: string
@@ -82,13 +82,9 @@ const getRangesForA = (rules: ReturnType<typeof parse>['rules']) => {
       const ins = instructions[i]
       if (ins.type === 'compare') {
         const nextRanges = cloneDeep(ranges)
-        if (ins.op === '<') {
-          nextRanges[ins.property][1] = ins.v - 1
-          ranges[ins.property][0] = ins.v
-        } else {
-          nextRanges[ins.property][0] = ins.v + 1
-          ranges[ins.property][1] = ins.v
-        }
+        const n = ins.op === '<' ? 1 : 0
+        nextRanges[ins.property][n] = ins.v + (n === 1 ? -1 : 1)
+        ranges[ins.property][1 - n] = ins.v
         openBranches.push({
           label: ins.to,
           ranges: nextRanges,
