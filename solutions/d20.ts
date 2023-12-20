@@ -1,4 +1,4 @@
-import { lcm, product } from '../utils/maths'
+import { lcm } from '../utils/maths'
 
 type Node =
   | {
@@ -135,8 +135,8 @@ export const part2 = (input: string) => {
   const entries = Array.from(machine.map.entries())
   const [toRxLabel] = entries.find(([, node]) => node.to.includes('rx'))!
 
-  return product(
-    entries
+  return lcm(
+    ...entries
       .filter(([, node]) => node.to.includes(toRxLabel))
       .map(([label]) => label)
       .map((labelToFind) => machine.clone().pressUntil(labelToFind)),
