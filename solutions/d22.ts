@@ -115,7 +115,6 @@ export const part2 = (input: string) => {
     const clone = cloneDeep(cuboids)
     clone.splice(i, 1)
     const fallen = collapse(clone)
-    console.log(cuboids[i].label, fallen)
     sum += fallen
   }
 

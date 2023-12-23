@@ -2,7 +2,7 @@ import { describe, expect, it } from 'bun:test'
 import { part1, part2 } from './d22'
 import { readInput } from '../utils/fs'
 
-describe.skip('d22:p1', () => {
+describe('d22:p1', () => {
   it('should pass the example', () => {
     const input = `1,0,1~1,2,1
     0,0,2~2,0,2
@@ -36,6 +36,6 @@ describe('d22:p2', () => {
 
   it('should pass the puzzle input', async () => {
     const input = await readInput('d22.txt')
-    expect(part2(input)).toEqual(0)
+    expect(part2(input)).toEqual(58440)
   })
 })
