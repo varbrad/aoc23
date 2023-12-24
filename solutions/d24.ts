@@ -1,24 +1,12 @@
-const regex =
-  /(-?\d+),\s+(-?\d+),\s+(-?\d+)\s+@\s+(-?\d+),\s+(-?\d+),\s+(-?\d+)/
-type Line = {
-  x: number
-  y: number
-  z: number
-  m: number
-  c: number
-  dx: number
-  dy: number
-  dz: number
-}
+const regex = /(-?\d+),\s+(-?\d+),\s+-?\d+\s+@\s+(-?\d+),\s+(-?\d+),\s+-?\d+/
+type Line = { y: number; dy: number; m: number; c: number }
 const parse = (input: string) =>
   input
     .trim()
     .split('\n')
     .map<Line>((l) => {
-      const [x, y, z, dx, dy, dz] = l.match(regex)!.slice(1).map(Number)
-      const m = dy / dx
-      const c = y - m * x
-      return { x, y, z, dx, dy, dz, m, c }
+      const [x, y, dx, dy] = l.match(regex)!.slice(1).map(Number)
+      return { y, dy, m: dy / dx, c: y - (dy / dx) * x }
     })
 
 export const part1 = (
@@ -33,40 +21,38 @@ export const part1 = (
     const lA = lines[i]
     for (let j = i + 1; j < lines.length; ++j) {
       const lB = lines[j]
+      // Parallel lines - will never intersect
+      if (lA.m === lB.m) continue
 
-      // parallel lines - will never intersect
-      if (lA.m === lB.m) {
-        continue
-      }
+      // Get the intersection point on the x-axis
+      const xI = (lB.c - lA.c) / (lA.m - lB.m)
+      // Check if the intersection point is within the bounds of the input
+      if (xI < minBound || xI > maxBound) continue
 
-      const intersectX = (lB.c - lA.c) / (lA.m - lB.m)
+      // Get the y value of the intersection point
+      const yI = lA.m * xI + lA.c
+      // Check if the intersection point is within the bounds of the input
+      if (yI < minBound || yI > maxBound) continue
+      // If the first y value is in the past, then skip
+      if (lA.dy > 0 ? yI < lA.y : yI > lA.y) continue
+      // If the second y value is in the past, then skip
+      if (lB.dy > 0 ? yI < lB.y : yI > lB.y) continue
 
-      if (lA.dx > 0 ? intersectX < lA.x : intersectX > lA.x) {
-        continue
-      }
-
-      if (lB.dx > 0 ? intersectX < lB.x : intersectX > lB.x) {
-        continue
-      }
-
-      if (intersectX < minBound) continue
-      if (intersectX > maxBound) continue
-
-      const intersectY = lA.m * intersectX + lA.c
-
-      if (lA.dy > 0 ? intersectY < lA.y : intersectY > lA.y) {
-        continue
-      }
-
-      if (lB.dy > 0 ? intersectY < lB.y : intersectY > lB.y) {
-        continue
-      }
-
-      if (intersectY < minBound) continue
-      if (intersectY > maxBound) continue
-
+      // If we got here, the lines intersect in the future within the bounds
       sum++
     }
   }
   return sum
 }
+
+/**
+ * Part 2 was a bit of a mess to be honest, I eventually managed to cobble together a solution
+ * using the JavaScript library of the Z3 Solver (https://github.com/Z3Prover/z3).
+ *
+ * However, the library does not run at all when run using Bun, and so I had to run
+ * my solutions in Node.js using some very janky code.
+ *
+ * The code was a giant mess and I honestly don't fully understand how it actually solved
+ * the equations I fed into it, other than I got it to solve the example case (eventually)
+ * and then just plugged in my input and it gave me a big number which was correct.
+ */

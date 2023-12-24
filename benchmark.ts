@@ -108,7 +108,7 @@ const run = async () => {
         results.push({ day: sol.day, part: 1, average })
         console.log(...output)
       } else {
-        console.log(c.gray(' > part1 not implemented'))
+        console.log(c.gray(' > Part 1 not implemented'))
       }
 
       if (imported.part2) {
@@ -116,7 +116,7 @@ const run = async () => {
         results.push({ day: sol.day, part: 2, average })
         console.log(...output)
       } else {
-        console.log(c.gray(' > part2 not implemented'))
+        console.log(c.gray(' > Part 2 not implemented'))
       }
 
       console.log('')
