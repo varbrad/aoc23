@@ -1,70 +1,117 @@
-import { isDefined } from '../utils/types'
+import { sum } from 'lodash'
 
-type XY = { x: number; y: number }
 const parse = (input: string) => {
-  const items = input
+  const map = input
     .trim()
     .split('\n')
-    .flatMap((l, y) =>
-      l
-        .trim()
-        .split('')
-        .map<(XY & { type: '#' | 'S' }) | null>((type, x) =>
-          type === '#' || type === 'S' ? { x, y, type } : null,
-        ),
-    )
-    .filter(isDefined)
-
-  const walls = new Set<string>()
-  items.forEach((i) => i.type === '#' && walls.add(`${i.x},${i.y}`))
-  const start = items.find((i) => i.type === 'S')!
-
-  return {
-    walls,
-    start,
-  }
+    .map((l) => l.trim().split(''))
+  const sX = map.findIndex((l) => l.includes('S'))
+  const sY = map[sX].findIndex((c) => c === 'S')
+  map[sX][sY] = '.'
+  return { map, sX, sY }
 }
 
-function floodFill(
-  { walls, start }: ReturnType<typeof parse>,
+export const part1 = (input: string, maxSteps = 64) => {
+  const { map, sX, sY } = parse(input)
+  return totalNeighbours(map, sX, sY, maxSteps)
+}
+
+export const part2 = (input: string) => {
+  const { map, sX, sY } = parse(input)
+  const mapWidth = map.length
+
+  // How many repeating gardens can we fit in 26,501,365 steps?
+  const gardenGridDiameter = Math.floor(26_501_365 / mapWidth) - 1
+
+  /**
+   * The gardens end up being filled in a big sort of "diamond" shape, where
+   * the interior gardens will either fall on an odd or even "shape" of the
+   * path, so we need to count how many we have of each, as it is completely
+   * infeasible to try and brute-force simulate them all.
+   */
+  const oddCells = (Math.floor(gardenGridDiameter / 2) * 2 + 1) ** 2
+  const evenCells = (Math.floor((gardenGridDiameter + 1) / 2) * 2) ** 2
+
+  /**
+   * Now we know _how_ many of the odd and even gardens there will be, we need
+   * to simulate them both once to see how many steps are possible in each.
+   */
+  const oddGardenPlots = totalNeighbours(map, sX, sY, mapWidth * 2 + 1)
+  const evenGardenPlots = totalNeighbours(map, sX, sY, mapWidth * 2)
+
+  // Now we need to calculate how many steps are possible in the 4 corner gardens
+  const edgeGardens = sum(
+    [
+      [sX, mapWidth - 1],
+      [0, sY],
+      [sX, 0],
+      [mapWidth - 1, sY],
+    ].map(([x, y]) => totalNeighbours(map, x, y, mapWidth - 1)),
+  )
+
+  // And finally, we need to calculate how many steps are possible in the corner gardens
+  const nesw = [
+    [0, mapWidth - 1],
+    [mapWidth - 1, mapWidth - 1],
+    [0, 0],
+    [mapWidth - 1, 0],
+  ]
+
+  // We can now calculate how many steps are possible in the gardens that are on the
+  // "inside" of the diagonal line forming the diamond
+  const closerSteps = Math.floor(mapWidth / 2) - 1
+  const smallGardens =
+    (gardenGridDiameter + 1) *
+    sum(nesw.map(([x, y]) => totalNeighbours(map, x, y, closerSteps)))
+
+  // We can now calculate how many steps are possible in the gardens that are on the
+  // "outside" of the diagonal line forming the diamond
+  const longerSteps = Math.floor((mapWidth * 3) / 2) - 1
+  const largeGardens =
+    gardenGridDiameter *
+    sum(nesw.map(([x, y]) => totalNeighbours(map, x, y, longerSteps)))
+
+  // The interior gardens is now easy to calculate - just multiply the number of
+  // "odd" gardens by the number of steps possible in each, and do the same for
+  // the "even" gardens
+  const interiorGardens =
+    oddCells * oddGardenPlots + evenCells * evenGardenPlots
+
+  // And it's then just a case of adding them all together
+  return interiorGardens + smallGardens + largeGardens + edgeGardens
+}
+
+// De-dupe the visited cells by using a single number to represent a x,y,distance
+const fingerprint = (x: number, y: number, d: number) =>
+  (d << 16) | (y << 8) | x
+
+const totalNeighbours = (
+  map: string[][],
+  x: number,
+  y: number,
   maxSteps: number,
-): XY[] {
-  const visited = new Set<string>()
-  const result = new Set<string>()
-  const queue: [XY, number][] = [[start, 0]]
-
-  while (queue.length > 0) {
-    const [xy, distance] = queue.shift()!
-    const { x, y } = xy
-
-    const pointKey = `${x},${y}`
-    if (visited.has(pointKey) || distance > maxSteps) continue
-
-    visited.add(pointKey)
-    result.add(pointKey)
-
-    const neighbors: XY[] = [
-      { x: x + 1, y },
-      { x: x - 1, y },
-      { x, y: y + 1 },
-      { x, y: y - 1 },
-    ]
-
-    for (const neighbor of neighbors) {
-      const neighborKey = `${neighbor.x},${neighbor.y}`
-      if (!visited.has(neighborKey) && !walls.has(neighborKey)) {
-        queue.push([neighbor, distance + 1])
-      }
+  visited = new Set<number>(),
+  distance = 0,
+): number => {
+  const key = fingerprint(x, y, distance)
+  if (visited.has(key)) return 0
+  visited.add(key)
+  if (distance === maxSteps) return 1
+  return [
+    [x - 1, y],
+    [x + 1, y],
+    [x, y - 1],
+    [x, y + 1],
+  ].reduce((prev, [nx, ny]) => {
+    if (
+      nx >= 0 &&
+      ny >= 0 &&
+      nx < map[0].length &&
+      ny < map.length &&
+      map[ny][nx] === '.'
+    ) {
+      prev += totalNeighbours(map, nx, ny, maxSteps, visited, distance + 1)
     }
-  }
-
-  return Array.from(result).map((pointKey) => {
-    const [x, y] = pointKey.split(',').map(Number)
-    return { x, y }
-  })
+    return prev
+  }, 0)
 }
-
-export const part1 = (input: string, maxSteps = 64) =>
-  floodFill(parse(input), maxSteps).filter(
-    (c) => (Math.abs(c.x) + Math.abs(c.y)) % 2 === maxSteps % 2,
-  ).length
