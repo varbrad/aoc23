@@ -55,7 +55,7 @@ export const part1 = (input: string) => {
   cuboidLoop: for (let i = 0; i < cuboids.length; ++i) {
     const label = cuboids[i].label
     const [supporting, leftover] = partition(supportList, (s) => s[0] === label)
-    for (const [_, l2] of supporting) {
+    for (const [, l2] of supporting) {
       const isBeingSupported = leftover.some((s) => s[1] === l2)
       if (!isBeingSupported) continue cuboidLoop
     }
@@ -72,6 +72,7 @@ const collapse = (cuboids: d22u.Cuboid[]) => {
     // Lets try and keep moving down
     // eslint-disable-next-line no-constant-condition
     let fell = false
+    // eslint-disable-next-line no-constant-condition
     outer: while (true) {
       // Are we touching the ground?
       const minZ = Math.min(c.z, c.z2)
